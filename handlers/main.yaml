@@ -1,0 +1,7 @@
+---
+
+- name: Restart VMware Tools services
+  service:
+    name: vmware-tools-services
+    state: restarted
+  when: not vmware_tools_service_started.changed

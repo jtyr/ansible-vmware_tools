@@ -1,0 +1,61 @@
+---
+
+- name: Test distribution
+  assert:
+    that: >
+      ansible_os_family == "RedHat" and
+      ansible_distribution_major_version | int <= 6
+
+- name: Create repo file
+  yumrepo:
+    name: vmware-tools
+    description: VMware Tools YUM repo
+    baseurl: "{{ vmware_tools_yumrepo_url }}"
+    gpgcheck: no
+  tags:
+    - vmware_tools_pkg
+
+- name: Install vmware kernel modules and tools
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: vmware_tools_pkgs
+  notify:
+    - Restart VMware Tools services
+  tags:
+    - vmware_tools_pkg
+
+- name: Make the init.d script available
+  file:
+    path: /etc/init.d/vmware-tools-services
+    src: /etc/vmware-tools/init/vmware-tools-services
+    state: link
+  when:
+    ansible_distribution_major_version | int == 6
+  tags:
+    - vmware_tools_config
+
+- name: Make the init.d script to work with upstart
+  lineinfile:
+    dest: /etc/init.d/vmware-tools-services
+    line: "# chkconfig: {{ vmware_tools_runlevels }} {{ vmware_tools_init_start }} {{ vmware_tools_init_stop }}"
+    insertbefore: "# VMWARE_INIT_INFO"
+  when:
+    ansible_distribution_major_version | int == 6
+  tags:
+    - vmware_tools_config
+
+- name: Make sure VMware Tools services is enabled
+  service:
+    name: vmware-tools-services
+    enabled: yes
+  tags:
+    - vmware_tools_config
+
+- name: Make sure VMware Tools services is running
+  service:
+    name: vmware-tools-services
+    state: started
+  register: vmware_tools_service_started
+  tags:
+    - vmware_tools_config

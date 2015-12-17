@@ -1,0 +1,15 @@
+---
+
+galaxy_info:
+  author: Jiri Tyr
+  description: VMware Tools
+  license: MIT
+  min_ansible_version: 2.1
+  platforms:
+    - name: EL
+      versions:
+        - 5
+        - 6
+  categories:
+    - system
+dependencies: []
