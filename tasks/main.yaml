@@ -7,7 +7,7 @@
       ansible_distribution_major_version | int <= 6
 
 - name: Create repo file
-  yumrepo:
+  yum_repository:
     name: vmware-tools
     description: VMware Tools YUM repo
     baseurl: "{{ vmware_tools_yumrepo_url }}"
